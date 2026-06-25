@@ -1,6 +1,6 @@
 package org.example;
 
-import com.formdev.flatlaf.FlatDarkLaf;
+import com.formdev.flatlaf.FlatLightLaf;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -9,6 +9,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.geom.RoundRectangle2D;
+import java.awt.image.BufferedImage;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.time.LocalTime;
@@ -18,39 +19,36 @@ import java.util.concurrent.Executors;
 
 /**
  * Debswana DrillSergeant — IT Admin PowerShell Command Centre
- * Fluent Design + Debswana brand colors, glassmorphism, rounded cards.
+ * FlatLightLaf + Debswana brand colors: white, #00487B, #009BD6
  */
 public class Main extends JFrame {
 
     // ── Debswana Brand Palette ───────────────────────────────────────────────
-    // Deep navy backgrounds (Debswana corporate navy)
-    static final Color BG_BASE       = new Color(13, 17, 28);         // deepest background
-    static final Color BG_SURFACE    = new Color(20, 25, 40);         // panel surface
-    static final Color BG_CARD       = new Color(28, 34, 52);         // card background
-    static final Color BG_CARD_HOVER = new Color(34, 42, 64);         // card hover
-    static final Color BG_NAV        = new Color(16, 21, 34);         // nav rail
+    static final Color BG_BASE       = Color.WHITE;
+    static final Color BG_SURFACE    = new Color(245, 248, 252);
+    static final Color BG_CARD       = new Color(237, 244, 251);
+    static final Color BG_CARD_HOVER = new Color(220, 236, 248);
+    static final Color BG_NAV        = new Color(0, 72, 123);         // #00487B
 
-    // Debswana accent: corporate teal-green + gold highlight
-    static final Color ACCENT        = new Color(0, 168, 107);        // Debswana green
-    static final Color ACCENT_LIGHT  = new Color(0, 210, 135);        // hover state
-    static final Color ACCENT_GLOW   = new Color(0, 168, 107, 40);    // glassmorphism glow
-    static final Color GOLD          = new Color(212, 170, 60);       // Debswana gold
+    static final Color ACCENT        = new Color(0, 155, 214);        // #009BD6
+    static final Color ACCENT_DARK   = new Color(0, 72, 123);         // #00487B
+    static final Color ACCENT_LIGHT  = new Color(51, 181, 229);
+    static final Color ACCENT_GLOW   = new Color(0, 155, 214, 30);
+    static final Color GOLD          = new Color(212, 170, 60);
     static final Color GOLD_LIGHT    = new Color(240, 200, 80);
 
-    // Danger / warning
-    static final Color WARN          = new Color(255, 160, 50);
-    static final Color WARN_BG       = new Color(255, 160, 50, 30);
-    static final Color DANGER        = new Color(220, 70, 70);
+    static final Color WARN          = new Color(220, 120, 20);
+    static final Color WARN_BG       = new Color(255, 200, 100, 40);
+    static final Color DANGER        = new Color(200, 50, 50);
 
-    // Text hierarchy
-    static final Color TEXT_H1       = new Color(235, 240, 252);
-    static final Color TEXT_H2       = new Color(190, 200, 220);
-    static final Color TEXT_MUTED    = new Color(110, 125, 155);
-    static final Color TEXT_ACCENT   = ACCENT;
+    static final Color TEXT_H1       = new Color(15, 30, 60);
+    static final Color TEXT_H2       = new Color(40, 70, 110);
+    static final Color TEXT_MUTED    = new Color(120, 145, 175);
+    static final Color TEXT_NAV      = new Color(200, 225, 245);      // light text on dark nav
+    static final Color TEXT_ACCENT   = ACCENT_DARK;
 
-    // Borders & separators
-    static final Color BORDER        = new Color(45, 55, 80);
-    static final Color BORDER_ACCENT = new Color(0, 168, 107, 80);
+    static final Color BORDER        = new Color(200, 215, 230);
+    static final Color BORDER_ACCENT = new Color(0, 155, 214, 80);
 
     // ── Typography ────────────────────────────────────────────────────────────
     static final Font F_APP_TITLE = new Font("Segoe UI", Font.BOLD,   15);
@@ -80,7 +78,7 @@ public class Main extends JFrame {
     private JTextArea outputArea;
     private JPanel    contentStack;   // CardLayout panel swapped by nav
     private CardLayout cardLayout;
-    private JLabel    activeNavLabel; // currently selected nav item
+    private NavItem   activeNavLabel; // currently selected nav item
 
     private final ExecutorService executor = Executors.newCachedThreadPool(r -> {
         Thread t = new Thread(r, "ps-runner");
@@ -109,9 +107,9 @@ public class Main extends JFrame {
     // ── Header ───────────────────────────────────────────────────────────────
     private JPanel buildHeader() {
         JPanel header = new JPanel(new BorderLayout(0, 0));
-        header.setBackground(BG_SURFACE);
+        header.setBackground(ACCENT_DARK);   // #00487B header bar
         header.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createMatteBorder(0, 0, 1, 0, BORDER),
+                BorderFactory.createMatteBorder(0, 0, 1, 0, new Color(0, 50, 100)),
                 new EmptyBorder(10, 20, 10, 20)));
 
         // Left: logo + wordmark
@@ -125,7 +123,7 @@ public class Main extends JFrame {
         } else {
             JLabel dot = new JLabel("◆");
             dot.setFont(new Font("Segoe UI", Font.BOLD, 20));
-            dot.setForeground(ACCENT);
+            dot.setForeground(Color.WHITE);
             left.add(dot);
         }
 
@@ -134,10 +132,10 @@ public class Main extends JFrame {
         wordmark.setOpaque(false);
         JLabel appName = new JLabel("DrillSergeant");
         appName.setFont(F_APP_TITLE);
-        appName.setForeground(TEXT_H1);
+        appName.setForeground(Color.WHITE);
         JLabel appSub = new JLabel("Debswana IT Command Centre");
         appSub.setFont(F_SMALL);
-        appSub.setForeground(TEXT_MUTED);
+        appSub.setForeground(new Color(180, 215, 240));
         wordmark.add(appName);
         wordmark.add(appSub);
         left.add(wordmark);
@@ -153,7 +151,7 @@ public class Main extends JFrame {
         // Right: clear output button
         JPanel right = new JPanel(new FlowLayout(FlowLayout.RIGHT, 8, 0));
         right.setOpaque(false);
-        JButton clearBtn = makePillButton("Clear Output", BG_CARD, TEXT_MUTED, BORDER);
+        JButton clearBtn = makePillButton("Clear Output", new Color(0, 95, 158), new Color(200, 225, 245), new Color(0, 120, 190));
         clearBtn.addActionListener(e -> outputArea.setText(""));
         right.add(clearBtn);
 
@@ -205,6 +203,11 @@ public class Main extends JFrame {
         return panel;
     }
 
+    // Nav hover bg: slightly lighter than BG_NAV
+    static final Color BG_NAV_HOVER  = new Color(0, 95, 158);
+    // Nav active bg: #009BD6 highlight strip
+    static final Color BG_NAV_ACTIVE = new Color(0, 155, 214);
+
     private JPanel buildNavRail() {
         JPanel rail = new JPanel();
         rail.setLayout(new BoxLayout(rail, BoxLayout.Y_AXIS));
@@ -216,75 +219,84 @@ public class Main extends JFrame {
 
         JLabel sectionLabel = new JLabel("COMMANDS");
         sectionLabel.setFont(new Font("Segoe UI", Font.BOLD, 10));
-        sectionLabel.setForeground(TEXT_MUTED);
+        sectionLabel.setForeground(new Color(150, 195, 225));
         sectionLabel.setBorder(new EmptyBorder(0, 16, 8, 0));
         sectionLabel.setAlignmentX(Component.LEFT_ALIGNMENT);
         rail.add(sectionLabel);
 
+        // {iconAssetKey, label, cardKey}
         String[][] items = {
-            {"🌐", "Network",      "network"},
-            {"🔧", "Boot & Repair","boot"},
-            {"🔄", "Updates",      "updates"},
-            {"🖥",  "Drivers",      "drivers"},
-            {"⚡", "Quick Run",    "quick"},
+            {"wifi",        "Network",       "network"},
+            {"wrench",      "Boot & Repair", "boot"},
+            {"refresh-cw",  "Updates",       "updates"},
+            {"monitor-cog", "Drivers",       "drivers"},
+            {"pickaxe",     "Quick Run",     "quick"},
         };
 
-        JLabel firstLabel = null;
+        NavItem firstItem = null;
         for (String[] item : items) {
-            JLabel navItem = makeNavItem(item[0], item[1], item[2]);
-            if (firstLabel == null) firstLabel = navItem;
+            NavItem navItem = makeNavItem(item[0], item[1], item[2]);
+            if (firstItem == null) firstItem = navItem;
             rail.add(navItem);
         }
 
-        // Activate first item
-        if (firstLabel != null) activateNav(firstLabel, "network");
+        if (firstItem != null) activateNav(firstItem, "network");
 
         rail.add(Box.createVerticalGlue());
         return rail;
     }
 
-    private JLabel makeNavItem(String icon, String label, String cardKey) {
-        JLabel item = new JLabel(icon + "  " + label);
-        item.setFont(F_NAV);
-        item.setForeground(TEXT_MUTED);
-        item.setOpaque(true);
-        item.setBackground(BG_NAV);
-        item.setBorder(new EmptyBorder(10, 16, 10, 16));
-        item.setMaximumSize(new Dimension(NAV_WIDTH, 42));
+    private NavItem makeNavItem(String iconKey, String label, String cardKey) {
+        // Load icon tinted white for the dark nav
+        ImageIcon icon = tintIcon(loadIcon("assets/" + iconKey + ".png", 18, 18), Color.WHITE);
+        NavItem item = new NavItem(icon, label);
+        item.setMaximumSize(new Dimension(NAV_WIDTH, 44));
         item.setAlignmentX(Component.LEFT_ALIGNMENT);
         item.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 
         item.addMouseListener(new MouseAdapter() {
             @Override public void mouseEntered(MouseEvent e) {
-                if (activeNavLabel != item) item.setBackground(BG_CARD);
+                if (activeNavLabel != item) { item.setNavBg(BG_NAV_HOVER); item.repaint(); }
             }
             @Override public void mouseExited(MouseEvent e) {
-                if (activeNavLabel != item) {
-                    item.setBackground(BG_NAV);
-                    item.setForeground(TEXT_MUTED);
-                }
+                if (activeNavLabel != item) { item.setNavBg(BG_NAV); item.repaint(); }
             }
-            @Override public void mouseClicked(MouseEvent e) {
-                activateNav(item, cardKey);
-            }
+            @Override public void mouseClicked(MouseEvent e) { activateNav(item, cardKey); }
         });
         return item;
     }
 
-    private void activateNav(JLabel item, String cardKey) {
+    private void activateNav(NavItem item, String cardKey) {
         if (activeNavLabel != null) {
-            activeNavLabel.setBackground(BG_NAV);
-            activeNavLabel.setForeground(TEXT_MUTED);
-            activeNavLabel.setFont(F_NAV);
+            ((NavItem) activeNavLabel).setActive(false);
+            ((NavItem) activeNavLabel).setNavBg(BG_NAV);
+            activeNavLabel.repaint();
         }
         activeNavLabel = item;
-        item.setBackground(ACCENT_GLOW);
-        item.setForeground(ACCENT_LIGHT);
-        item.setFont(F_NAV_BOLD);
+        item.setActive(true);
+        item.setNavBg(BG_NAV_ACTIVE);
+        item.repaint();
         cardLayout.show(contentStack, cardKey);
     }
 
-    /** Wrap a content panel in a scroll pane. */
+    /** Tints a white/grey icon to a given color by replacing non-transparent pixels. */
+    private ImageIcon tintIcon(ImageIcon src, Color tint) {
+        if (src == null) return null;
+        int w = src.getIconWidth(), h = src.getIconHeight();
+        BufferedImage out = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);
+        Graphics2D g2 = out.createGraphics();
+        g2.drawImage(src.getImage(), 0, 0, null);
+        g2.dispose();
+        for (int x = 0; x < w; x++) {
+            for (int y = 0; y < h; y++) {
+                int argb = out.getRGB(x, y);
+                int alpha = (argb >> 24) & 0xFF;
+                if (alpha > 0) out.setRGB(x, y, (alpha << 24) | (tint.getRGB() & 0x00FFFFFF));
+            }
+        }
+        return new ImageIcon(out);
+    }
+
     private JScrollPane wrapScroll(JPanel content) {
         JScrollPane sp = new JScrollPane(content,
                 JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
@@ -355,15 +367,15 @@ public class Main extends JFrame {
 
         // Console header
         JPanel hdr = new JPanel(new BorderLayout());
-        hdr.setBackground(BG_CARD);
+        hdr.setBackground(ACCENT_DARK);
         hdr.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createMatteBorder(0, 0, 1, 0, BORDER),
+                BorderFactory.createMatteBorder(0, 0, 1, 0, new Color(0, 50, 100)),
                 new EmptyBorder(10, 16, 10, 16)));
         JLabel lbl = new JLabel("● Output Console");
         lbl.setFont(F_SECTION);
-        lbl.setForeground(ACCENT);
+        lbl.setForeground(Color.WHITE);
 
-        JButton copyBtn = makePillButton("Copy", BG_SURFACE, TEXT_MUTED, BORDER);
+        JButton copyBtn = makePillButton("Copy", new Color(0, 95, 158), new Color(200, 225, 245), new Color(0, 120, 190));
         copyBtn.addActionListener(e -> {
             Toolkit.getDefaultToolkit().getSystemClipboard()
                    .setContents(new java.awt.datatransfer.StringSelection(outputArea.getText()), null);
@@ -374,8 +386,8 @@ public class Main extends JFrame {
 
         outputArea = new JTextArea();
         outputArea.setFont(F_MONO);
-        outputArea.setBackground(new Color(10, 13, 20));
-        outputArea.setForeground(new Color(160, 220, 170));
+        outputArea.setBackground(new Color(15, 35, 60));
+        outputArea.setForeground(new Color(130, 210, 255));
         outputArea.setCaretColor(ACCENT_LIGHT);
         outputArea.setEditable(false);
         outputArea.setLineWrap(true);
@@ -387,7 +399,7 @@ public class Main extends JFrame {
 
         JScrollPane scroll = new JScrollPane(outputArea);
         scroll.setBorder(null);
-        scroll.getViewport().setBackground(new Color(10, 13, 20));
+        scroll.getViewport().setBackground(new Color(15, 35, 60));
 
         wrapper.add(hdr,    BorderLayout.NORTH);
         wrapper.add(scroll, BorderLayout.CENTER);
@@ -397,18 +409,18 @@ public class Main extends JFrame {
     // ── Footer ───────────────────────────────────────────────────────────────
     private JPanel buildFooter() {
         JPanel footer = new JPanel(new BorderLayout());
-        footer.setBackground(BG_SURFACE);
+        footer.setBackground(ACCENT_DARK);
         footer.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createMatteBorder(1, 0, 0, 0, BORDER),
+                BorderFactory.createMatteBorder(1, 0, 0, 0, new Color(0, 50, 100)),
                 new EmptyBorder(7, 20, 7, 20)));
 
         JLabel left = new JLabel("Debswana IT Department  ·  DrillSergeant v2.0");
         left.setFont(F_SMALL);
-        left.setForeground(TEXT_MUTED);
+        left.setForeground(new Color(180, 215, 240));
 
         JLabel right = new JLabel("⚠  Run as Administrator for full functionality");
         right.setFont(F_SMALL);
-        right.setForeground(WARN);
+        right.setForeground(new Color(255, 200, 100));
 
         footer.add(left,  BorderLayout.WEST);
         footer.add(right, BorderLayout.EAST);
@@ -441,7 +453,7 @@ public class Main extends JFrame {
             @Override protected void paintComponent(Graphics g) {
                 Graphics2D g2 = (Graphics2D) g.create();
                 g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-                GradientPaint gp = new GradientPaint(0,0,ACCENT,getWidth(),0,ACCENT_GLOW);
+                GradientPaint gp = new GradientPaint(0,0,ACCENT_DARK,getWidth(),0,ACCENT);
                 g2.setPaint(gp);
                 g2.fillRoundRect(0, 0, getWidth(), getHeight(), 3, 3);
                 g2.dispose();
@@ -467,7 +479,7 @@ public class Main extends JFrame {
         card.setAlignmentX(LEFT_ALIGNMENT);
 
         // Icon
-        ImageIcon icon = loadIcon("assets/" + iconKey + ".png", 20, 20);
+        ImageIcon icon = tintIcon(loadIcon("assets/" + iconKey + ".png", 20, 20), accent);
         JLabel iconLabel = (icon != null)
                 ? new JLabel(icon)
                 : new JLabel("▸");
@@ -682,9 +694,9 @@ public class Main extends JFrame {
             this.radius = radius;
             setOpaque(false);
             setBorder(new EmptyBorder(4, 14, 4, 14));
-            setBackground(BG_CARD);
-            setForeground(TEXT_H2);
-            setCaretColor(ACCENT_LIGHT);
+            setBackground(new Color(0, 95, 158));
+            setForeground(Color.WHITE);
+            setCaretColor(Color.WHITE);
         }
 
         @Override protected void paintComponent(Graphics g) {
@@ -692,12 +704,12 @@ public class Main extends JFrame {
             g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
             g2.setColor(getBackground());
             g2.fill(new RoundRectangle2D.Float(0, 0, getWidth(), getHeight(), radius, radius));
-            g2.setColor(BORDER);
+            g2.setColor(new Color(0, 120, 190));
             g2.setStroke(new BasicStroke(1f));
             g2.draw(new RoundRectangle2D.Float(0.5f, 0.5f, getWidth()-1, getHeight()-1, radius, radius));
             super.paintComponent(g);
             if (getText().isEmpty() && !isFocusOwner()) {
-                g2.setColor(TEXT_MUTED);
+                g2.setColor(new Color(160, 200, 230));
                 g2.setFont(getFont());
                 FontMetrics fm = g2.getFontMetrics();
                 g2.drawString(placeholder, 14, (getHeight() + fm.getAscent() - fm.getDescent()) / 2);
@@ -706,21 +718,64 @@ public class Main extends JFrame {
         }
     }
 
+    /** Custom nav item panel with icon + label, painted with active/hover state. */
+    static class NavItem extends JPanel {
+        private final ImageIcon icon;
+        private final String label;
+        private Color navBg = BG_NAV;
+        private boolean active = false;
+
+        NavItem(ImageIcon icon, String label) {
+            this.icon  = icon;
+            this.label = label;
+            setOpaque(false);
+            setLayout(new FlowLayout(FlowLayout.LEFT, 14, 0));
+            setPreferredSize(new Dimension(NAV_WIDTH, 44));
+        }
+
+        void setNavBg(Color c)  { navBg = c; }
+        void setActive(boolean a) { active = a; }
+
+        @Override protected void paintComponent(Graphics g) {
+            Graphics2D g2 = (Graphics2D) g.create();
+            // Active item: left accent bar + highlight bg
+            if (active) {
+                g2.setColor(navBg);
+                g2.fillRect(0, 0, getWidth(), getHeight());
+                g2.setColor(Color.WHITE);
+                g2.fillRect(0, 8, 3, getHeight() - 16); // left accent strip
+            } else {
+                g2.setColor(navBg);
+                g2.fillRect(0, 0, getWidth(), getHeight());
+            }
+            // Icon
+            int iconX = 16, iconY = (getHeight() - 18) / 2;
+            if (icon != null) icon.paintIcon(this, g2, iconX, iconY);
+            // Label
+            g2.setFont(active ? F_NAV_BOLD : F_NAV);
+            g2.setColor(Color.WHITE);
+            FontMetrics fm = g2.getFontMetrics();
+            g2.drawString(label, iconX + 18 + 8, (getHeight() + fm.getAscent() - fm.getDescent()) / 2);
+            g2.dispose();
+        }
+    }
+
     // ── Entry point ───────────────────────────────────────────────────────────
     public static void main(String[] args) {
-        FlatDarkLaf.setup();
-        UIManager.put("Panel.background",              BG_SURFACE);
-        UIManager.put("ScrollBar.trackArc",            999);
-        UIManager.put("ScrollBar.thumbArc",            999);
-        UIManager.put("ScrollBar.width",               8);
-        UIManager.put("ScrollBar.thumb",               BG_CARD);
-        UIManager.put("ScrollBar.track",               BG_SURFACE);
-        UIManager.put("Component.focusWidth",          1);
-        UIManager.put("Button.arc",                    RADIUS_BTN);
-        UIManager.put("Component.arc",                 RADIUS_CARD);
-        UIManager.put("TextComponent.arc",             RADIUS_PILL);
-        UIManager.put("TextField.background",          BG_CARD);
-        UIManager.put("TextField.foreground",          TEXT_H2);
+        FlatLightLaf.setup();
+        UIManager.put("Panel.background",               BG_SURFACE);
+        UIManager.put("ScrollBar.trackArc",             999);
+        UIManager.put("ScrollBar.thumbArc",             999);
+        UIManager.put("ScrollBar.width",                8);
+        UIManager.put("ScrollBar.thumb",                BORDER);
+        UIManager.put("ScrollBar.track",                BG_SURFACE);
+        UIManager.put("Component.focusWidth",           1);
+        UIManager.put("Component.focusColor",           ACCENT);
+        UIManager.put("Button.arc",                     RADIUS_BTN);
+        UIManager.put("Component.arc",                  RADIUS_CARD);
+        UIManager.put("TextComponent.arc",              RADIUS_PILL);
+        UIManager.put("TextField.background",           Color.WHITE);
+        UIManager.put("TextField.foreground",           TEXT_H1);
         UIManager.put("SplitPaneDivider.draggingColor", ACCENT_GLOW);
         SwingUtilities.invokeLater(() -> new Main().setVisible(true));
     }
